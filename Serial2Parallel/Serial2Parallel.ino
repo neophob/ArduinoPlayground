@@ -79,6 +79,56 @@ count = nr-of-pixels*3;
       }
     }
 
+
+here are the details form the fastspi library:
+
+ if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
+  {
+    cli();
+    register byte *p = m_pData;
+    register byte *e = m_pDataEnd;
+
+        // If we haven't run through yet - nothing has primed the SPI bus,
+        // and the first SPI_B will block.  
+    if(!run) { 
+      run = 1;
+      SPI_A(*p++);
+      SPI_B; SPI_A(*p++);
+      SPI_B; SPI_A(*p++);
+    }
+    while(p != e) { 
+     SPI_B; SPI_A(*p++);
+     SPI_B; SPI_A(*p++);
+     SPI_B; SPI_A(*p++);
+   }
+   m_nDirty = 0;
+   sei();
+
+
+else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD8806) 
+{
+  cli();
+  register byte *p = m_pData;
+  register byte *e = m_pDataEnd;
+
+      // The LPD8806 requires the high bit to be set
+  while(p != e) { 
+    SPI_B; SPI_A( *p++ >> 1 | 0x80);
+    SPI_B; SPI_A( *p++ >> 1 | 0x80);
+    SPI_B; SPI_A( *p++ >> 1 | 0x80);
+  }
+
+      // Latch out our 0's to set the data stream
+  int n = (m_nLeds + 191 )/ 192;
+  while(n--) { 
+    SPI_B; SPI_A(0);
+    SPI_B; SPI_A(0);
+    SPI_B; SPI_A(0);
+  }
+  m_nDirty=0;
+  sei();
+}   
+
 */
 void moveDataReallyFast(byte strobeOn, byte strobeOff)
 {
