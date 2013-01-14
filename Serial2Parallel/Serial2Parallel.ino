@@ -53,6 +53,33 @@ void loop() {
 #define Hold()  asm volatile("nop\nnop\n")	// hold time after falling edge
 #define Pulse()  asm volatile("nop\n")		// lengthen clock pulse width
 
+/*
+used for lpd8806
+
+primitive code of lpd8806:
+i=nr-of-pixels*3;
+p=pointer to pixels;
+while(i--) {
+    p++;
+    for(bit=0x80; bit; bit >>= 1) {
+	  if (p&bit) digitalWrite(datapin, HIGH);
+	  else digitalWrite(datapin, LOW);
+	  digitalWrite(clkpin, HIGH);
+	  digitalWrite(clkpin, LOW);
+
+
+primitive for ws2801:
+count = nr-of-pixels*3;
+    for(i=0; i<count; i++ ) {
+      for(bit=0x80; bit; bit >>= 1) {
+        if(pixels[i] & bit) digitalWrite(datapin, HIGH);
+        else digitalWrite(datapin, LOW);
+        digitalWrite(clkpin, HIGH);
+	digitalWrite(clkpin, LOW);
+      }
+    }
+
+*/
 void moveDataReallyFast(byte strobeOn, byte strobeOff)
 {
 	unsigned char c;
@@ -65,17 +92,11 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 			if (c & (1<<RXOUTI)) UEINTX = 0x6B;
 			return;
 		}
-		c = UEDATX;
-		PORTD = c;
+		c = UEDATX; //0
+		PORTD = c;        //DATA
 		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
+		PORTB = strobeOn; //CLK
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -83,6 +104,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -90,6 +112,23 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //3
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
+		c = UEDATX; //4
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -97,6 +136,31 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //6
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
+		c = UEDATX; //7
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
+		c = UEDATX; //8
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -104,6 +168,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //10
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -111,6 +184,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //12
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -118,6 +200,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //14
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -125,6 +216,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -132,6 +224,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -139,6 +232,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //18
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -146,6 +248,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //20
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -153,6 +264,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -160,6 +272,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //23
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -167,6 +288,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -174,6 +296,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //26
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -181,6 +312,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -188,6 +320,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //29
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -195,6 +336,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -202,6 +344,23 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //32
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
+		c = UEDATX; //33
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -209,6 +368,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //35
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -216,6 +384,23 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //37
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
+		c = UEDATX; //38
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -223,6 +408,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //40
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -230,6 +424,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -237,6 +432,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //43
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -244,6 +448,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //45
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -251,6 +464,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //47
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -258,6 +480,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -265,6 +488,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //50
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -272,6 +504,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -279,6 +512,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //53
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -286,6 +528,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -293,6 +536,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //56
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -300,6 +552,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -307,6 +560,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -314,6 +568,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
+		c = UEDATX; //60
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -321,6 +584,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
+
 		c = UEDATX;
 		Pulse();
 		PORTB = strobeOff;
@@ -328,188 +592,15 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
-		c = UEDATX;
+
+		c = UEDATX; //63
 		Pulse();
 		PORTB = strobeOff;
 		Hold();
 		PORTD = c;
 		Setup();
 		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-		c = UEDATX;
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
+
 		UEINTX = 0x6B;
 		Pulse();
 		PORTB = strobeOff;
