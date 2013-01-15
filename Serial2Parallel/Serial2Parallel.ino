@@ -139,10 +139,13 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 	while (1) {
 		c = UEINTX;
 		if (!(c & (1<<RWAL))) {
-			if (c & (1<<RXOUTI)) UEINTX = 0x6B;
+		  // no data in buffer
+			if (c & (1<<RXOUTI)) {
+        UEINTX = 0x6B;
+      }
 			return;
 		}
-		c = UEDATX; //0
+		c = UEDATX;       // take one byte out of the buffer, eead byte 0
 		PORTD = c;        //DATA
 		Setup();
 		PORTB = strobeOn; //CLK
@@ -651,6 +654,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		Setup();
 		PORTB = strobeOn;
 
+    // Release the USB buffer
 		UEINTX = 0x6B;
 		Pulse();
 		PORTB = strobeOff;
