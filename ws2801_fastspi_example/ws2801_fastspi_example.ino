@@ -111,6 +111,7 @@ void setup() {
 
   FastSPI_LED.setLeds(NUM_LEDS);
   FastSPI_LED.setChipset(CFastSPI_LED::SPI_WS2801);
+//  FastSPI_LED.setChipset(CFastSPI_LED::SPI_LPD8806);
 
   //select spi speed, 7 is very slow, 0 is blazing fast
   //hint: the small (1 led, 5v) spi modules can run maximal at speed2!
@@ -126,7 +127,9 @@ void setup() {
 //      main loop
 // --------------------------------------------
 void loop() {
-  rainbow();    	
+  rainbow();    
+  
+  delay(50);	
 }
 
 
