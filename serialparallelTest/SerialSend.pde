@@ -232,7 +232,7 @@ public class SerialSend {
 	public boolean sendFrame(byte data[]) throws IllegalArgumentException {		
 		//hint: the arduino serial buffer is 128bytes
 		if (data == null || data.length!=64) {
-			throw new IllegalArgumentException("data lenght must be 64 bytes but was: "+data.length);
+			throw new IllegalArgumentException("data lenght must be 64 bytes!");
 		}
 	      
 		try {
