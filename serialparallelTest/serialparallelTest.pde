@@ -64,6 +64,8 @@ int[] gammaTab;
 
 boolean initialized = false;
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 String toBinaryString(byte b) {
   int val = b&255;
   String s = Integer.toBinaryString(val);
@@ -73,7 +75,10 @@ String toBinaryString(byte b) {
   }
   return s;
 }
-/////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void setup() {
   println("Hi!");
   gammaTab = generateGammaTab(2.5);
@@ -163,40 +168,64 @@ for (int i=0; i<256; i+=10){
 int wheelPos=0;
 int pos=0;
 
-//set random colors
-void fxWheel(int delayTime) {  
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static int SIZE_OF_ONE_RGB_COLOR = 24;
+static int SIZE_USB_BUFFER = 64;
+
+void fxWheel(int nrOfPixels, int delayTime) {  
   long l1=System.currentTimeMillis();
-  byte[] in = new byte[24];
-  byte[] buffer = new byte[192];
+  byte[] in = new byte[SIZE_OF_ONE_RGB_COLOR];
+  byte[] buffer = new byte[SIZE_USB_BUFFER*2];
   int ofs=0;
+    wheelPos++;
   
   //fill 8 pixels
-  for (int a=0; a<8; a++) {
+  for (int a=0; a<nrOfPixels; a++) {
  
+    //fill buffer with nice color
     int col = wheel(wheelPos);   
     for (int cl=0; cl<8; cl++) {
-      in[3*cl  ] = (byte)( col&255);
-      in[3*cl+1] = (byte)( (col>>8)&255);
-      in[3*cl+2] = (byte)( (col>>16)&255);
-      
+      in[3*cl  ] = (byte)( gammaTab[col&255]);
+      in[3*cl+1] = (byte)( gammaTab[(col>>8)&255]);
+      in[3*cl+2] = (byte)( gammaTab[(col>>16)&255]);      
     }
-    wheelPos++;
 
+    //convert color
     byte[] data = convert24bytes(in); //1 byte per output
-    System.arraycopy(data, 0, buffer, ofs, 24); //add one pixel to the array
-    ofs+=24;
+    //System.arraycopy(src, srcPos, dest, destPos, length)
+    System.arraycopy(data, 0, buffer, ofs, SIZE_OF_ONE_RGB_COLOR); //add one pixel to the array
+    ofs+=SIZE_OF_ONE_RGB_COLOR;
+    
+    if (ofs >= SIZE_USB_BUFFER) {
+        srl.sendFrame( Arrays.copyOfRange(buffer, 0, SIZE_USB_BUFFER) );
+        ofs-=SIZE_USB_BUFFER;
+        if (ofs>0) {
+          println("copy "+ofs);
+          System.arraycopy(buffer, SIZE_USB_BUFFER, buffer, 0, ofs);
+        }
+    }
   }
   
-  srl.sendFrame( Arrays.copyOfRange(buffer, 0, 64) );
-  srl.sendFrame( Arrays.copyOfRange(buffer, 64, 128) );
-  srl.sendFrame( Arrays.copyOfRange(buffer, 128, 192) );
+  //fill up buffer for remaining buffer
+  if (ofs>0) {
+    println("remaining: "+ofs);
+    //clear remaining buffer
+    Arrays.fill(buffer, ofs, SIZE_USB_BUFFER, (byte)0);
+    srl.sendFrame( Arrays.copyOfRange(buffer, 0, SIZE_USB_BUFFER) );  
+  }
+  
+  
+//  srl.sendFrame( Arrays.copyOfRange(buffer, 0, 64) );
+//  srl.sendFrame( Arrays.copyOfRange(buffer, 64, 128) );
+//  srl.sendFrame( Arrays.copyOfRange(buffer, 128, 192) );
   
   long l2=System.currentTimeMillis()-l1;
-  println(pos+" needed time: "+l2);
+  println("needed time: "+l2);
   delay(delayTime);
 }
 
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //set random colors
 void fxChaos(int delayTime) {  
   long l1=System.currentTimeMillis();
@@ -213,7 +242,7 @@ void fxChaos(int delayTime) {
 }  
 
 
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //my first color stuff
 void fxStroboCol(int delayTime) {  
   int col = (int)random(0xffffff);
@@ -229,6 +258,7 @@ void fxStroboCol(int delayTime) {
   delay(delayTime);
 }  
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //simple white/black strobo
 void fxStroboBW(int delayTime) {
   long l1=System.currentTimeMillis();
@@ -265,14 +295,15 @@ void fxStroboBW(int delayTime) {
 
 int cnt=0;
 
-/////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void draw() {
   if (this.initialized) {
 
     //    fxStroboBW(100);
     //    fxStroboCol(50);
     //    fxChaos(50);
-    fxWheel(30);
+    fxWheel(50, 25);
   }
 }
 
