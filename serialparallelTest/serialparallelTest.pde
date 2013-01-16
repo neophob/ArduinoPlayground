@@ -83,6 +83,8 @@ void setup() {
   println("Hi!");
   gammaTab = generateGammaTab(2.5);
 
+  frameRate(25);
+  
   //the in array holds a buffer for 8 pixels
   byte[] in = new byte[24];
 
@@ -149,10 +151,7 @@ for (int i=0; i<256; i+=10){
 
   for (int i=0; i<8; i++) {
     println(" D"+i+": "+outp[i]);
-  }
-
-  /**/
-//  frameRate(1850);
+  }  
 
   try {
     srl = new SerialSend(this, "/dev/tty.usbmodem12341", 50);          
@@ -178,14 +177,15 @@ void fxWheel(int nrOfPixels, int delayTime) {
   byte[] in = new byte[SIZE_OF_ONE_RGB_COLOR];
   byte[] buffer = new byte[SIZE_USB_BUFFER*2];
   int ofs=0;
-    wheelPos++;
+//    wheelPos++;
   
   //fill 8 pixels
   for (int a=0; a<nrOfPixels; a++) {
  
     //fill buffer with nice color
-    int col = wheel(wheelPos);   
+       
     for (int cl=0; cl<8; cl++) {
+      int col = wheel(wheelPos++);
       in[3*cl  ] = (byte)( gammaTab[col&255]);
       in[3*cl+1] = (byte)( gammaTab[(col>>8)&255]);
       in[3*cl+2] = (byte)( gammaTab[(col>>16)&255]);      
@@ -201,7 +201,7 @@ void fxWheel(int nrOfPixels, int delayTime) {
         srl.sendFrame( Arrays.copyOfRange(buffer, 0, SIZE_USB_BUFFER) );
         ofs-=SIZE_USB_BUFFER;
         if (ofs>0) {
-          println("copy "+ofs);
+          //println("copy "+ofs);
           System.arraycopy(buffer, SIZE_USB_BUFFER, buffer, 0, ofs);
         }
     }
@@ -302,8 +302,12 @@ void draw() {
 
     //    fxStroboBW(100);
     //    fxStroboCol(50);
-    //    fxChaos(50);
-    fxWheel(50, 25);
+    //    fxChaos(10);
+    
+    //24 pixels - no visible errors, 576 bytes, 9 packets
+    //32 pixels - visible errors, 768 bytes, 12 packets
+    fxWheel(64*4, 2);
+    println("fps: "+frameRate);
   }
 }
 

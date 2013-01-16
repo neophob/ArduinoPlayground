@@ -51,43 +51,18 @@ void loop() {
 
 #define Setup() asm volatile("nop\nnop\nnop\n")	// setup time before rising edge
 #define Hold()  asm volatile("nop\nnop\n")	// hold time after falling edge
-#define Pulse()  asm volatile("nop\n")		// lengthen clock pulse width
+#define Pulse() asm volatile("nop\n")		// lengthen clock pulse width
 
 /*
-used for lpd8806
+#define Setup() asm volatile("nop\nnop\nnop\n")	// setup time before rising edge
+#define Hold()  asm volatile("nop\nnop\nnop\n")	// hold time after falling edge
+#define Pulse()  asm volatile("nop\nnop\nnop\n")		// lengthen clock pulse width
+*/
 
-primitive code of lpd8806:
-i=nr-of-pixels*3;
-p=pointer to pixels;
-while(i--) {
-    p++;
-    for(bit=0x80; bit; bit >>= 1) {
-	  if (p&bit) digitalWrite(datapin, HIGH);
-	  else digitalWrite(datapin, LOW);
-	  digitalWrite(clkpin, HIGH);
-	  digitalWrite(clkpin, LOW);
-
-
-primitive for ws2801:
-count = nr-of-pixels*3;
-    for(i=0; i<count; i++ ) {
-      for(bit=0x80; bit; bit >>= 1) {
-        if(pixels[i] & bit) digitalWrite(datapin, HIGH);
-        else digitalWrite(datapin, LOW);
-        digitalWrite(clkpin, HIGH);
-	digitalWrite(clkpin, LOW);
-      }
-    }
-
-
+/*
 here are the details form the fastspi library:
 
  if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
-  {
-    cli();
-    register byte *p = m_pData;
-    register byte *e = m_pDataEnd;
-
         // If we haven't run through yet - nothing has primed the SPI bus,
         // and the first SPI_B will block.  
     if(!run) { 
@@ -101,16 +76,9 @@ here are the details form the fastspi library:
      SPI_B; SPI_A(*p++);
      SPI_B; SPI_A(*p++);
    }
-   m_nDirty = 0;
-   sei();
 
 
 else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD8806) 
-{
-  cli();
-  register byte *p = m_pData;
-  register byte *e = m_pDataEnd;
-
       // The LPD8806 requires the high bit to be set
   while(p != e) { 
     SPI_B; SPI_A( *p++ >> 1 | 0x80);
@@ -125,9 +93,6 @@ else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD8806)
     SPI_B; SPI_A(0);
     SPI_B; SPI_A(0);
   }
-  m_nDirty=0;
-  sei();
-}   
 
 */
 void moveDataReallyFast(byte strobeOn, byte strobeOff)
@@ -141,10 +106,11 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		if (!(c & (1<<RWAL))) {
 		  // no data in buffer
 			if (c & (1<<RXOUTI)) {
-        UEINTX = 0x6B;
-      }
+                          UEINTX = 0x6B;
+                        }
 			return;
 		}
+
 		c = UEDATX;       // take one byte out of the buffer, eead byte 0
 		PORTD = c;        //DATA
 		Setup();
@@ -654,7 +620,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		Setup();
 		PORTB = strobeOn;
 
-    // Release the USB buffer
+                // Release the USB buffer
 		UEINTX = 0x6B;
 		Pulse();
 		PORTB = strobeOff;
