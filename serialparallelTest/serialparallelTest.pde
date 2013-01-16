@@ -18,7 +18,7 @@
   D7: 10101110 11111111 11111111
   
   
-  Example backwards, I want the first pixel on all leds in color red:
+  Example backwards, I want the first pixel on all leds in color purple:
   D0: 11111111 00000000 11111111
   D1: 11111111 00000000 11111111
   D2: 11111111 00000000 11111111
@@ -33,6 +33,23 @@
   00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  |  0x000 0x000 0x000 0x000 0x000 0x000 0x000 0x000
   11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111111  |  0x255 0x255 0x255 0x255 0x255 0x255 0x255 0x255 
   
+  
+  
+  Another Example backwards
+  D0: 11100001 00000000 11111111
+  D1: 00000000 00000000 00000000
+  D2: 00000000 00000000 00000000
+  D3: 00000000 00000000 00000000
+  D4: 00000000 00000000 00000000
+  D5: 00000000 00000000 00000000
+  D6: 00000000 00000000 00000000
+  D7: 00000000 00000000 00000000
+
+  Example buffer to send out:
+  10000000 10000000 10000000 00000000 00000000 00000000 00000000 00000000  |  0x128 0x128 0x128 0x000 0x000 0x000 0x000 0x000 
+  00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  |  0x000 0x000 0x000 0x000 0x000 0x000 0x000 0x000
+  10000000 10000000 10000000 10000000 10000000 10000000 10000000 10000000  |  0x128 0x128 0x128 0x128 0x128 0x128 0x128 0x128 
+
   Conclusion:
   -to set 1 pixel on each line, i need to send out 24 bytes
   -send out 3x64 bytes to update 8 pixels on each line
@@ -41,19 +58,20 @@
 SerialSend srl;
 
 //buffer
-byte[] colorArray;  
+int[] gammaTab;
 
 boolean initialized = false;
 
+/////////////
 void setup() {
   frameRate(1850);
-
-  colorArray = new byte[64];
 
   try {
     srl = new SerialSend(this, "/dev/tty.usbmodem12341", 50);          
     this.initialized=true;
     println("Ping result: "+ this.initialized);    
+    
+    gammaTab = generateGammaTab(2.5);
   } catch (Exception e) {
     println("failed");
     e.printStackTrace();
@@ -61,37 +79,43 @@ void setup() {
   
 }
 
-void fillArray(int val) {
-  for (int i=0; i<64; i++) {
-    colorArray[i] = (byte)val;
+int pos=0;
+//set random colors
+void fxWheel(int delayTime) {  
+  long l1=System.currentTimeMillis();
+  for (int a=0; a<6; a++) {    
+    byte[] buffer = fillBufferWithWheel();
+    srl.sendFrame( Arrays.copyOfRange(buffer, 0, 64) );
+    srl.sendFrame( Arrays.copyOfRange(buffer, 64, 128) );
+    srl.sendFrame( Arrays.copyOfRange(buffer, 128, 192) );
   }
+  long l2=System.currentTimeMillis()-l1;
+  println(pos+" needed time: "+l2);
+  delay(delayTime);  
 }
 
-//my first color
-void fxStroboCol(int delayTime) {  
-  byte[] buffer = new byte[192];  //192 bytes, buffer to send 8x8 rgb pixels out
-  
-  int ofs=0;
-  for (int j=0; j<8; j++) {
-    for (int i=0; i<8; i++) {
-      buffer[i+ofs   ] = (byte)0xff; 
-      buffer[i+ofs+8 ] = (byte)0x0;
-      buffer[i+ofs+16] = (byte)0x0;    
-    }
-    ofs += 24;
-  }
-  
-  //black
+
+//set random colors
+void fxChaos(int delayTime) {  
+  long l1=System.currentTimeMillis();
   for (int a=0; a<7; a++) {
-      //one loop send data for eight pixel
-      fillArray(0);
-      srl.sendFrame(colorArray);
-      fillArray(0);
-      srl.sendFrame(colorArray);
-      fillArray(0);
-      srl.sendFrame(colorArray);
+    
+    byte[] buffer = fillBufferWithRandomColor();
+    srl.sendFrame( Arrays.copyOfRange(buffer, 0, 64) );
+    srl.sendFrame( Arrays.copyOfRange(buffer, 64, 128) );
+    srl.sendFrame( Arrays.copyOfRange(buffer, 128, 192) );
   }
-  delay(delayTime);
+  long l2=System.currentTimeMillis()-l1;
+  println("needed time: "+l2);
+  delay(delayTime);  
+}  
+
+
+
+//my first color stuff
+void fxStroboCol(int delayTime) {  
+  int col = (int)random(0xffffff);
+  byte[] buffer = fillBufferWithSolidColor(col);
   
   //color
   for (int a=0; a<6; a++) {
@@ -100,37 +124,32 @@ void fxStroboCol(int delayTime) {
     srl.sendFrame( Arrays.copyOfRange(buffer, 128, 192) );
   }
 
-  delay(delayTime);
-  
+  delay(delayTime);  
 }  
 
 //simple white/black strobo
 void fxStroboBW(int delayTime) {
- 
     long l1=System.currentTimeMillis();
+    
+    byte[] colorArray = fillArray(0);
     for (int a=0; a<7; a++) {
       //one loop send data for eight pixel
-      fillArray(0);
       srl.sendFrame(colorArray);
-      fillArray(0);
       srl.sendFrame(colorArray);
-      fillArray(0);
       srl.sendFrame(colorArray);
     }
     long l2=System.currentTimeMillis()-l1;
     delay(delayTime);
 
+    colorArray = fillArray(255);
     for (int a=0; a<6; a++) {
       //send 64 bytes out, update 8 bytes for each output
-      fillArray(255);
       srl.sendFrame(colorArray); 
       
       //send 8 bytes 
-      fillArray(255);
       srl.sendFrame(colorArray);
       
       //send 8 bytes 
-      fillArray(255);
       srl.sendFrame(colorArray);
       
       // -> we send 24 bytes - one color
@@ -144,11 +163,14 @@ void fxStroboBW(int delayTime) {
 
 int cnt=0;
 
+/////////////
 void draw() {
   if (this.initialized) {
     
 //    fxStroboBW(100);
-    fxStroboCol(200);
+//    fxStroboCol(50);
+//    fxChaos(50);
+    fxWheel(250);
   }
 
 }
