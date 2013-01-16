@@ -166,11 +166,15 @@ int pos=0;
 //set random colors
 void fxWheel(int delayTime) {  
   long l1=System.currentTimeMillis();
-  for (int a=0; a<6; a++) {    
-    byte[] buffer = fillBufferWithWheel();
-    srl.sendFrame( Arrays.copyOfRange(buffer, 0, 64) );
-    srl.sendFrame( Arrays.copyOfRange(buffer, 64, 128) );
-    srl.sendFrame( Arrays.copyOfRange(buffer, 128, 192) );
+  for (int a=0; a<6; a++) {
+   for (int ofs=0; ofs<3; ofs++) {
+      int col = wheel(35*ofs);
+      in[3*ofs  ] = (byte)( col&255);
+      in[3*ofs+1] = (byte)( (col>>8)&255);
+      in[3*ofs+2] = (byte)( (col>>16)&255);
+    }
+    //loop
+    convert24bytes(in); //1 byte per output
   }
   long l2=System.currentTimeMillis()-l1;
   println(pos+" needed time: "+l2);

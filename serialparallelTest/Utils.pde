@@ -27,6 +27,8 @@ Output Hardware:
  D6: 00000000 00000000 00000000
  D7: 00000000 00000000 00000000
  
+So this method will convert ONE RGB COLOR for each of the EIGHT OUTPUTS lines
+ 
 */
 byte[] convert24bytes(byte[] inputData) {
   byte[] outputData = new byte[24];
