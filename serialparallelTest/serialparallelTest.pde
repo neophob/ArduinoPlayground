@@ -146,10 +146,8 @@ for (int i=0; i<256; i+=10){
     println(" D"+i+": "+outp[i]);
   }
 
-
-  if (1==1)  return;
   /**/
-  frameRate(1850);
+//  frameRate(1850);
 
   try {
     srl = new SerialSend(this, "/dev/tty.usbmodem12341", 50);          
@@ -162,20 +160,37 @@ for (int i=0; i<256; i+=10){
   }
 }
 
+int wheelPos=0;
 int pos=0;
+
 //set random colors
 void fxWheel(int delayTime) {  
   long l1=System.currentTimeMillis();
-  for (int a=0; a<6; a++) {
-   for (int ofs=0; ofs<3; ofs++) {
-      int col = wheel(35*ofs);
-      in[3*ofs  ] = (byte)( col&255);
-      in[3*ofs+1] = (byte)( (col>>8)&255);
-      in[3*ofs+2] = (byte)( (col>>16)&255);
+  byte[] in = new byte[24];
+  byte[] buffer = new byte[192];
+  int ofs=0;
+  
+  //fill 8 pixels
+  for (int a=0; a<8; a++) {
+ 
+    int col = wheel(wheelPos);   
+    for (int cl=0; cl<8; cl++) {
+      in[3*cl  ] = (byte)( col&255);
+      in[3*cl+1] = (byte)( (col>>8)&255);
+      in[3*cl+2] = (byte)( (col>>16)&255);
+      
     }
-    //loop
-    convert24bytes(in); //1 byte per output
+    wheelPos++;
+
+    byte[] data = convert24bytes(in); //1 byte per output
+    System.arraycopy(data, 0, buffer, ofs, 24); //add one pixel to the array
+    ofs+=24;
   }
+  
+  srl.sendFrame( Arrays.copyOfRange(buffer, 0, 64) );
+  srl.sendFrame( Arrays.copyOfRange(buffer, 64, 128) );
+  srl.sendFrame( Arrays.copyOfRange(buffer, 128, 192) );
+  
   long l2=System.currentTimeMillis()-l1;
   println(pos+" needed time: "+l2);
   delay(delayTime);
@@ -257,7 +272,7 @@ void draw() {
     //    fxStroboBW(100);
     //    fxStroboCol(50);
     //    fxChaos(50);
-    fxWheel(250);
+    fxWheel(30);
   }
 }
 
