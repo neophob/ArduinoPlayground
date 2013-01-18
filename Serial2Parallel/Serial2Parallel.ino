@@ -53,47 +53,17 @@ void loop() {
 #define Hold()  asm volatile("nop\nnop\n")	// hold time after falling edge
 #define Pulse() asm volatile("nop\n")		// lengthen clock pulse width
 
-/*
-#define Setup() asm volatile("nop\nnop\nnop\n")	// setup time before rising edge
-#define Hold()  asm volatile("nop\nnop\nnop\n")	// hold time after falling edge
-#define Pulse()  asm volatile("nop\nnop\nnop\n")		// lengthen clock pulse width
-*/
 
 /*
-here are the details form the fastspi library:
+This firmware is tested on LPD8806.
 
- if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
-        // If we haven't run through yet - nothing has primed the SPI bus,
-        // and the first SPI_B will block.  
-    if(!run) { 
-      run = 1;
-      SPI_A(*p++);
-      SPI_B; SPI_A(*p++);
-      SPI_B; SPI_A(*p++);
-    }
-    while(p != e) { 
-     SPI_B; SPI_A(*p++);
-     SPI_B; SPI_A(*p++);
-     SPI_B; SPI_A(*p++);
-   }
+the difference between LPD8806 and WS2801.
 
+LPD8806: 7bit
+WS2801: 8bit
 
-else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD8806) 
-      // The LPD8806 requires the high bit to be set
-  while(p != e) { 
-    SPI_B; SPI_A( *p++ >> 1 | 0x80);
-    SPI_B; SPI_A( *p++ >> 1 | 0x80);
-    SPI_B; SPI_A( *p++ >> 1 | 0x80);
-  }
-
-      // Latch out our 0's to set the data stream
-  int n = (m_nLeds + 191 )/ 192;
-  while(n--) { 
-    SPI_B; SPI_A(0);
-    SPI_B; SPI_A(0);
-    SPI_B; SPI_A(0);
-  }
-
+the LPD8806 latch the data if some special frames are sent out (multiple zero bytes)
+the WS2801 latch the data after the clock line is low for 500us.
 */
 void moveDataReallyFast(byte strobeOn, byte strobeOff)
 {
@@ -118,11 +88,11 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 
 		c = UEDATX;
 		Pulse();
-		PORTB = strobeOff;
+		PORTB = strobeOff; //Only change data when clock is low!
 		Hold();
 		PORTD = c;
 		Setup();
-		PORTB = strobeOn;
+		PORTB = strobeOn; //Data is latched when clock goes high
 
 		c = UEDATX;
 		Pulse();
@@ -612,18 +582,21 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		Setup();
 		PORTB = strobeOn;
 
+                //TODO the last byte is a control byte.
+                //commands:
+                // -00: put clock low (use this to latch the data)
+                // -01: keep clock high (use this is the transmission isn't finished yet)                
 		c = UEDATX; //63
-		Pulse();
-		PORTB = strobeOff;
-		Hold();
-		PORTD = c;
-		Setup();
-		PORTB = strobeOn;
-
+                Pulse();
+                                
                 // Release the USB buffer
 		UEINTX = 0x6B;
 		Pulse();
-		PORTB = strobeOff;
+                if (c==0) {
+                  //put clock low
+  		  PORTB = strobeOff;
+                }
+
 	}
 }
 
