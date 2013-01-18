@@ -82,6 +82,9 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		}
 
 		c = UEDATX;       // take one byte out of the buffer, eead byte 0
+		Pulse();
+		PORTB = strobeOff; 
+		Hold();
 		PORTD = c;        //DATA
 		Setup();
 		PORTB = strobeOn; //CLK
