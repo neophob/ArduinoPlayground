@@ -82,14 +82,11 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		}
 
 		c = UEDATX;       // take one byte out of the buffer, eead byte 0
-		Pulse();
-		PORTB = strobeOff; 
-		Hold();
 		PORTD = c;        //DATA
 		Setup();
 		PORTB = strobeOn; //CLK
 
-		c = UEDATX;
+		c = UEDATX; //1
 		Pulse();
 		PORTB = strobeOff; //Only change data when clock is low!
 		Hold();
@@ -97,7 +94,7 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		Setup();
 		PORTB = strobeOn; //Data is latched when clock goes high
 
-		c = UEDATX;
+		c = UEDATX; //2
 		Pulse();
 		PORTB = strobeOff;
 		Hold();
@@ -585,21 +582,18 @@ void moveDataReallyFast(byte strobeOn, byte strobeOff)
 		Setup();
 		PORTB = strobeOn;
 
-                //TODO the last byte is a control byte.
-                //commands:
-                // -00: put clock low (use this to latch the data)
-                // -01: keep clock high (use this is the transmission isn't finished yet)                
 		c = UEDATX; //63
-                Pulse();
-                                
+		Pulse();
+		PORTB = strobeOff;
+		Hold();
+		PORTD = c;
+		Setup();
+		PORTB = strobeOn;
+
                 // Release the USB buffer
 		UEINTX = 0x6B;
 		Pulse();
-                if (c==0) {
-                  //put clock low
-  		  PORTB = strobeOff;
-                }
-
+		PORTB = strobeOff;
 	}
 }
 
